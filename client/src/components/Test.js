@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { token } from '../spotify';
 import { theme, mixins, media, Main } from '../styles';
-import {
-  getTopArtistShort,
-} from '../spotify';
+import { getTopArtistShort } from '../spotify';
 import styled from 'styled-components/macro';
 import { Button } from '../styles';
 import { IconInfo } from './icons';
@@ -11,6 +9,8 @@ import Loader from './Loader';
 import { Link } from '@reach/router';
 import axios from 'axios';
 import { useAppContext } from '../utils/stateContext';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 const { colors, fontSizes, spacing } = theme;
 
 const ArtistsContainer = styled.div`
@@ -120,6 +120,26 @@ const Title = styled.a`
   font-weight: bold;
   font-size: 30px;
 `;
+const notifyMinting = () =>
+  toast.info('Transaction sent!', {
+    position: 'top-right',
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+  });
+const notifyMinted = () =>
+  toast.success('PoL minted!', {
+    position: 'top-right',
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+  });
 
 const Test = () => {
   const [accessToken, setAccessToken] = useState('');
@@ -134,73 +154,84 @@ const Test = () => {
       setTopArtist(data);
     };
     fetchData();
-    console.log("l'adresse que je récupère dans test", address)
+    console.log('l\'adresse que je récupère dans test', address);
   }, []);
 
   useEffect(() => {
     if (topArtist !== null) {
       if (topArtist.items[0].popularity < 50) {
-        setRarity('Epic')
+        setRarity('Epic');
       } else if (topArtist.items[0].popularity >= 50 && topArtist.items[0].popularity < 60) {
-        setRarity('Rare')
+        setRarity('Rare');
       } else if (topArtist.items[0].popularity >= 60 && topArtist.items[0].popularity < 75) {
-        setRarity('Special')
+        setRarity('Special');
       } else {
-        setRarity('Common')
+        setRarity('Common');
       }
     }
   }, [topArtist]);
 
-  const uploadMeta = () => {
-    const url = `http://localhost:8888/upload-meta`;
-    const date = new Date();
-    const dataJson = {
-      name: 'Pol Party',
-      description:
-        'This NFT is my Proof-Of-Listening based on my listening data on Spotify. Minted with PolParty',
-      image: 'https://ipfs.io/ipfs/QmSZcW7Nie38TMdXz97zUWBjGw4vJvBVVJLXFVhY3jvWNm',
-      slug: 'pol_party',
-      metadata: {
+  const uploadMeta = async () => {
+    return new Promise(async (resolve, reject) => {
+      const url = `http://localhost:8888/upload-meta`;
+      const date = new Date();
+      const dataJson = {
         name: 'Pol Party',
-        artist: topArtist.items[0].name,
-        date: Date(),
-        rarity: rarity,
-      },
-      attributes: [
-        { trait_type: 'Artist', value: topArtist.items[0].name },
-        { trait_type: 'Rarity', value: rarity },
-        { trait_type: 'Genre', value: topArtist.items[0].genres.join(', ') },
-        {
-          trait_type: 'Date',
-          value: (date.getMonth() + 1).toString() + '-' + date.getFullYear().toString(),
+        description:
+          'This NFT is my Proof-Of-Listening based on my listening data on Spotify. Minted with PolParty',
+        image: 'https://ipfs.io/ipfs/QmSZcW7Nie38TMdXz97zUWBjGw4vJvBVVJLXFVhY3jvWNm',
+        slug: 'pol_party',
+        metadata: {
+          name: 'Pol Party',
+          artist: topArtist.items[0].name,
+          date: Date(),
+          rarity: rarity,
         },
-      ],
-    };
-    const options = {
-      url: url,
-      params: { data: dataJson },
-    };
-    axios
-      .request(options)
-      .then(function (response) {
-        console.log(response.data);
-        return 'https://ipfs.io/ipfs/' + response.data.IpfsHash;
-      })
-      .catch(function (error) {
-        //handle error here
-      });
+        attributes: [
+          { trait_type: 'Artist', value: topArtist.items[0].name },
+          { trait_type: 'Rarity', value: rarity },
+          { trait_type: 'Genre', value: topArtist.items[0].genres.join(', ') },
+          {
+            trait_type: 'Date',
+            value: `${(date.getMonth() + 1).toString()}-${date.getFullYear().toString()}`,
+          },
+        ],
+      };
+      const options = {
+        url: url,
+        params: { data: dataJson },
+      };
+      try {
+        axios
+          .request(options)
+          .then(function (response) {
+            console.log(response.data);
+            resolve(`https://ipfs.io/ipfs/${response.data.IpfsHash}`);
+          })
+          .catch(function (error) {
+            //handle error here
+          });
+      } catch (err) {
+        resolve(err)
+      }
+    })
   };
 
-  const mintNFT = _ipfsUrl => {
+  const mintNFT = (_ipfsUrl) => {
+    notifyMinting();
     const options = {
       url: 'http://localhost:8888/mint',
-      params: { data: 'https://ipfs.io/ipfs/Qmc83e1RrH3jtnePa6CKtVwf5raK1VWbsttD5pRD6xhwJM', address: address },
+      params: {
+        data: _ipfsUrl,
+        address: address,
+      },
     };
 
     axios
       .request(options)
       .then(function (response) {
         console.log(response.data);
+        notifyMinted();
       })
       .catch(function (error) {
         console.error(error);
@@ -216,6 +247,7 @@ const Test = () => {
 
   return (
     <Main>
+      <ToastContainer />
       <Title>Your top artist of the month!</Title>
       <ArtistsContainer>
         {topArtist ? (
@@ -231,8 +263,7 @@ const Test = () => {
                 {name}
               </ArtistName>
               <Stats>
-                <Stat>
-                </Stat>
+                <Stat></Stat>
                 <Stat>
                   <NumLabel>Rarity</NumLabel>
                   <Number>{rarity}</Number>

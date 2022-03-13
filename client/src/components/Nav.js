@@ -1,12 +1,8 @@
 import React from 'react';
 import { Link } from '@reach/router';
-import { useMoralis } from "react-moralis";
+import { useMoralis } from 'react-moralis';
 
-import {
-  IconUser,
-  IconMicrophone,
-  IconMusic,
-} from './icons';
+import { IconUser, IconMicrophone, IconMusic } from './icons';
 
 import styled from 'styled-components/macro';
 import { theme, mixins, media } from '../styles';
@@ -91,13 +87,12 @@ const LogoutButton = styled.a`
   color: ${colors.white};
   border: 1px solid ${colors.white};
   border-radius: 30px;
-  margin-top: 30px;
-  height: 7vh;
+  height: 50px;
   font-size: ${fontSizes.xs};
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
-  text-align: center;
+  padding-top: 10%;
   &:hover,
   &:focus {
     background-color: ${colors.white};
@@ -149,29 +144,27 @@ const isActive = ({ isCurrent }) => (isCurrent ? { className: 'active' } : null)
 const NavLink = props => <Link getProps={isActive} {...props} />;
 
 function Nav() {
-
   const { authenticate, isAuthenticated, isAuthenticating, user, account, logout } = useMoralis();
   const { address, setAddress } = useAppContext();
 
   const login = async () => {
     if (!isAuthenticated) {
-
-      await authenticate({ signingMessage: "Log in using Moralis" })
+      await authenticate({ signingMessage: 'Log in using Moralis' })
         .then(function (user) {
-          console.log("logged in user:", user);
-          console.log(user.get("ethAddress"));
-          setAddress(user.get("ethAddress"));
+          console.log('logged in user:', user);
+          console.log(user.get('ethAddress'));
+          setAddress(user.get('ethAddress'));
         })
         .catch(function (error) {
           console.log(error);
         });
     }
-  }
+  };
 
   const logOut = async () => {
     await logout();
-    console.log("logged out");
-  }
+    console.log('logged out');
+  };
 
   return (
     <Container>
@@ -180,7 +173,11 @@ function Nav() {
           <img src="https://ipfs.io/ipfs/bafkreih5wta6oiq76z3l4dsolozgbykhsdyalyy2dddkfy4zh5kqgffxfy"></img>
         </Link>
       </Logo>
-      {isAuthenticated ? <LogoutButton onClick={logOut}>Logout</LogoutButton> : <LogoutButton onClick={login}>login</LogoutButton>}
+      {isAuthenticated ? (
+        <LogoutButton onClick={logOut}>Logout</LogoutButton>
+      ) : (
+        <LogoutButton onClick={login}>Connect Wallet</LogoutButton>
+      )}
       <Menu>
         <MenuItem>
           <NavLink to="/">
@@ -203,7 +200,7 @@ function Nav() {
       </Menu>
       <Github></Github>
     </Container>
-  )
-};
+  );
+}
 
 export default Nav;

@@ -5,11 +5,12 @@ import { catchErrors } from '../utils';
 
 import { IconUser, IconInfo } from './icons';
 import Loader from './Loader';
+import CardsCollection from './CardsCollection';
 
 import styled from 'styled-components/macro';
 import { theme, mixins, media, Main } from '../styles';
 import { useAppContext } from '../utils/stateContext';
-import Moralis from "moralis"
+import Moralis from 'moralis';
 const { colors, fontSizes, spacing } = theme;
 
 const Header = styled.header`
@@ -196,19 +197,24 @@ const User = () => {
   }, []);
 
   useEffect(() => {
-    console.log(address)
+    console.log(address);
     if (address !== null) {
       fetchNFTs();
     }
   }, []);
 
   const fetchNFTs = async () => {
-    const options = { chain: 'matic', address: address, token_address: '0x7ba4dd0e097baed4fbf5905d566e6d5c7282681f' }
-    const nfts = await Moralis.Web3API.account.getNFTsForContract(options)
-    console.log(nfts)
+    const options = {
+      chain: 'matic',
+      address: address,
+      token_address: '0x7ba4dd0e097baed4fbf5905d566e6d5c7282681f',
+    };
+    const nfts = await Moralis.Web3API.account.getNFTsForContract(options);
+    console.log(nfts);
+    setNftArray(nfts.result);
     // setNftArray(nftArrays.result)
     // setNftsFetched(true)
-  }
+  };
 
   const totalPlaylists = playlists ? playlists.total : 0;
 
@@ -250,8 +256,8 @@ const User = () => {
               )}
             </Stats>
             <LogoutButton onClick={logout}>Logout</LogoutButton>
+            {address && <CardsCollection nftArray={nftArray} />}
           </Header>
-
         </Main>
       ) : (
         <Loader />

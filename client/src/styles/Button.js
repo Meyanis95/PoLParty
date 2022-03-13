@@ -9,6 +9,7 @@ const Button = styled.button`
   border-radius: 0;
   background: #000000;
   border-radius: 5px;
+  margin-top: 10px;
   transition: ${theme.transition};
   &:focus,
   &:active {

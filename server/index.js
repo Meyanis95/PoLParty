@@ -102,6 +102,7 @@ if (cluster.isMaster) {
 
   app.get('/mint', (req, res) => {
     const url = req.query.data;
+    const address = req.query.address;
     const options = {
       method: 'POST',
       url: 'https://api.nftport.xyz/v0/mints/customizable',
@@ -110,7 +111,7 @@ if (cluster.isMaster) {
         chain: 'polygon',
         contract_address: '0x7BA4DD0E097bAEd4FBf5905d566E6d5c7282681F',
         metadata_uri: url,
-        mint_to_address: '0xFe48Eb58b0B889E57844F50B4da7B1886F680C4F',
+        mint_to_address: address,
       },
     };
 

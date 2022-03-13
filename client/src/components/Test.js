@@ -3,9 +3,6 @@ import { token } from '../spotify';
 import { theme, mixins, media, Main } from '../styles';
 import {
   getTopArtistShort,
-  getTopArtistsMedium,
-  getTopArtistsLong,
-  getTopTracksShort,
 } from '../spotify';
 import styled from 'styled-components/macro';
 import { Button } from '../styles';
@@ -13,10 +10,8 @@ import { IconInfo } from './icons';
 import Loader from './Loader';
 import { Link } from '@reach/router';
 import axios from 'axios';
-require('dotenv').config();
+import { useAppContext } from '../utils/stateContext';
 const { colors, fontSizes, spacing } = theme;
-const pinataApiKey = process.env.PINATA_KEY;
-const pinataSecretApiKey = process.env.PINATA_SECRET_KEY;
 
 const ArtistsContainer = styled.div`
   display: grid;
@@ -35,6 +30,27 @@ const Artist = styled.div`
   flex-direction: column;
   align-items: center;
   text-align: center;
+`;
+const Stats = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 30px;
+  margin-top: ${spacing.base};
+`;
+const Stat = styled.div`
+  text-align: center;
+`;
+const Number = styled.div`
+  color: ${colors.green};
+  font-weight: 700;
+  font-size: ${fontSizes.md};
+`;
+const NumLabel = styled.p`
+  color: ${colors.lightGrey};
+  font-size: ${fontSizes.xs};
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: ${spacing.xs};
 `;
 const Mask = styled.div`
   ${mixins.flexCenter};
@@ -99,13 +115,17 @@ const ArtistName = styled.a`
 `;
 
 const Title = styled.a`
-  margin: ${spacing.base} 0;
+  display: grid;
   text-align: center;
+  font-weight: bold;
+  font-size: 30px;
 `;
 
 const Test = () => {
   const [accessToken, setAccessToken] = useState('');
   const [topArtist, setTopArtist] = useState(null);
+  const [rarity, setRarity] = useState(null);
+  const { address, setAddress } = useAppContext();
 
   useEffect(() => {
     setAccessToken(token);
@@ -114,7 +134,22 @@ const Test = () => {
       setTopArtist(data);
     };
     fetchData();
+    console.log("l'adresse que je récupère dans test", address)
   }, []);
+
+  useEffect(() => {
+    if (topArtist !== null) {
+      if (topArtist.items[0].popularity < 50) {
+        setRarity('Epic')
+      } else if (topArtist.items[0].popularity >= 50 && topArtist.items[0].popularity < 60) {
+        setRarity('Rare')
+      } else if (topArtist.items[0].popularity >= 60 && topArtist.items[0].popularity < 75) {
+        setRarity('Special')
+      } else {
+        setRarity('Common')
+      }
+    }
+  }, [topArtist]);
 
   const uploadMeta = () => {
     const url = `http://localhost:8888/upload-meta`;
@@ -123,17 +158,17 @@ const Test = () => {
       name: 'Pol Party',
       description:
         'This NFT is my Proof-Of-Listening based on my listening data on Spotify. Minted with PolParty',
-      image: 'https://ipfs.io/ipfs/QmYRdvS6ju12opqjEFQC8fNnrj69yoYNzzxTPDPMGEwee8',
+      image: 'https://ipfs.io/ipfs/QmSZcW7Nie38TMdXz97zUWBjGw4vJvBVVJLXFVhY3jvWNm',
       slug: 'pol_party',
       metadata: {
         name: 'Pol Party',
         artist: topArtist.items[0].name,
         date: Date(),
-        rarity: 'common',
+        rarity: rarity,
       },
       attributes: [
         { trait_type: 'Artist', value: topArtist.items[0].name },
-        { trait_type: 'Rarity', value: 'common' },
+        { trait_type: 'Rarity', value: rarity },
         { trait_type: 'Genre', value: topArtist.items[0].genres.join(', ') },
         {
           trait_type: 'Date',
@@ -159,7 +194,7 @@ const Test = () => {
   const mintNFT = _ipfsUrl => {
     const options = {
       url: 'http://localhost:8888/mint',
-      params: { data: 'https://ipfs.io/ipfs/Qmc83e1RrH3jtnePa6CKtVwf5raK1VWbsttD5pRD6xhwJM' },
+      params: { data: 'https://ipfs.io/ipfs/Qmc83e1RrH3jtnePa6CKtVwf5raK1VWbsttD5pRD6xhwJM', address: address },
     };
 
     axios
@@ -195,6 +230,14 @@ const Test = () => {
               <ArtistName href={external_urls.spotify} target="_blank" rel="noopener noreferrer">
                 {name}
               </ArtistName>
+              <Stats>
+                <Stat>
+                </Stat>
+                <Stat>
+                  <NumLabel>Rarity</NumLabel>
+                  <Number>{rarity}</Number>
+                </Stat>
+              </Stats>
               <Button onClick={() => mint()}>Mint!</Button>
             </Artist>
           ))

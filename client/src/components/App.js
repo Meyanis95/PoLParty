@@ -22,7 +22,6 @@ const App = () => {
   return (
     <AppContainer>
       <GlobalStyle />
-
       {accessToken ? <Profile /> : <LoginScreen />}
     </AppContainer>
   );

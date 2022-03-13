@@ -7,6 +7,8 @@ const Button = styled.button`
   cursor: pointer;
   border: 0;
   border-radius: 0;
+  background: #000000;
+  border-radius: 5px;
   transition: ${theme.transition};
   &:focus,
   &:active {

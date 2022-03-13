@@ -16,6 +16,7 @@ import Test from './Test';
 
 import styled from 'styled-components/macro';
 import { theme, media } from '../styles';
+import ContextProvider from '../utils/stateContext';
 
 const SiteWrapper = styled.div`
   padding-left: ${theme.navWidth};
@@ -27,21 +28,23 @@ const SiteWrapper = styled.div`
 
 const Profile = () => (
   <SiteWrapper>
-    <Nav />
-    <Router primary={false}>
-      <ScrollToTop path="/">
-        <User path="/" />
-        <RecentlyPlayed path="recent" />
-        <TopArtists path="artists" />
-        <TopTracks path="tracks" />
-        <Playlists path="playlists" />
-        <Playlist path="playlists/:playlistId" />
-        <Recommendations path="recommendations/:playlistId" />
-        <Track path="track/:trackId" />
-        <Artist path="artist/:artistId" />
-        <Test path="test" />
-      </ScrollToTop>
-    </Router>
+    <ContextProvider>
+      <Nav />
+      <Router primary={false}>
+        <ScrollToTop path="/">
+          <User path="/" />
+          <RecentlyPlayed path="recent" />
+          <TopArtists path="artists" />
+          <TopTracks path="tracks" />
+          <Playlists path="playlists" />
+          <Playlist path="playlists/:playlistId" />
+          <Recommendations path="recommendations/:playlistId" />
+          <Track path="track/:trackId" />
+          <Artist path="artist/:artistId" />
+          <Test path="test" />
+        </ScrollToTop>
+      </Router>
+    </ContextProvider>
   </SiteWrapper>
 );
 

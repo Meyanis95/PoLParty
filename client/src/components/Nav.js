@@ -1,19 +1,17 @@
 import React from 'react';
 import { Link } from '@reach/router';
+import { useMoralis } from "react-moralis";
 
 import {
-  IconSpotify,
   IconUser,
-  IconTime,
   IconMicrophone,
-  IconPlaylist,
   IconMusic,
-  IconGithub,
 } from './icons';
 
 import styled from 'styled-components/macro';
 import { theme, mixins, media } from '../styles';
-const { colors } = theme;
+import { useAppContext } from '../utils/stateContext';
+const { colors, fontSizes } = theme;
 
 const Container = styled.nav`
   ${mixins.coverShadow};
@@ -88,6 +86,24 @@ const Menu = styled.ul`
     justify-content: center;
   `};
 `;
+const LogoutButton = styled.a`
+  background-color: transparent;
+  color: ${colors.white};
+  border: 1px solid ${colors.white};
+  border-radius: 30px;
+  margin-top: 30px;
+  height: 7vh;
+  font-size: ${fontSizes.xs};
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-align: center;
+  &:hover,
+  &:focus {
+    background-color: ${colors.white};
+    color: ${colors.black};
+  }
+`;
 const MenuItem = styled.li`
   color: ${colors.lightGrey};
   font-size: 11px;
@@ -132,35 +148,62 @@ const isActive = ({ isCurrent }) => (isCurrent ? { className: 'active' } : null)
 
 const NavLink = props => <Link getProps={isActive} {...props} />;
 
-const Nav = () => (
-  <Container>
-    <Logo>
-      <Link to="/">
-        <img src="https://ipfs.io/ipfs/bafkreih5wta6oiq76z3l4dsolozgbykhsdyalyy2dddkfy4zh5kqgffxfy"></img>
-      </Link>
-    </Logo>
-    <Menu>
-      <MenuItem>
-        <NavLink to="/">
-          <IconUser />
-          <div>Profile</div>
-        </NavLink>
-      </MenuItem>
-      <MenuItem>
-        <NavLink to="artists">
-          <IconMicrophone />
-          <div>Top Artist</div>
-        </NavLink>
-      </MenuItem>
-      <MenuItem>
-        <NavLink to="tracks">
-          <IconMusic />
-          <div>Top Track</div>
-        </NavLink>
-      </MenuItem>
-    </Menu>
-    <Github></Github>
-  </Container>
-);
+function Nav() {
+
+  const { authenticate, isAuthenticated, isAuthenticating, user, account, logout } = useMoralis();
+  const { address, setAddress } = useAppContext();
+
+  const login = async () => {
+    if (!isAuthenticated) {
+
+      await authenticate({ signingMessage: "Log in using Moralis" })
+        .then(function (user) {
+          console.log("logged in user:", user);
+          console.log(user.get("ethAddress"));
+          setAddress(user.get("ethAddress"));
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
+  }
+
+  const logOut = async () => {
+    await logout();
+    console.log("logged out");
+  }
+
+  return (
+    <Container>
+      <Logo>
+        <Link to="/">
+          <img src="https://ipfs.io/ipfs/bafkreih5wta6oiq76z3l4dsolozgbykhsdyalyy2dddkfy4zh5kqgffxfy"></img>
+        </Link>
+      </Logo>
+      {isAuthenticated ? <LogoutButton onClick={logOut}>Logout</LogoutButton> : <LogoutButton onClick={login}>login</LogoutButton>}
+      <Menu>
+        <MenuItem>
+          <NavLink to="/">
+            <IconUser />
+            <div>Profile</div>
+          </NavLink>
+        </MenuItem>
+        <MenuItem>
+          <NavLink to="/test">
+            <IconMicrophone />
+            <div>Top Artist</div>
+          </NavLink>
+        </MenuItem>
+        <MenuItem>
+          <NavLink to="tracks">
+            <IconMusic />
+            <div>Top Track</div>
+          </NavLink>
+        </MenuItem>
+      </Menu>
+      <Github></Github>
+    </Container>
+  )
+};
 
 export default Nav;

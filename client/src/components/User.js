@@ -5,10 +5,11 @@ import { catchErrors } from '../utils';
 
 import { IconUser, IconInfo } from './icons';
 import Loader from './Loader';
-import TrackItem from './TrackItem';
 
 import styled from 'styled-components/macro';
 import { theme, mixins, media, Main } from '../styles';
+import { useAppContext } from '../utils/stateContext';
+import Moralis from "moralis"
 const { colors, fontSizes, spacing } = theme;
 
 const Header = styled.header`
@@ -180,8 +181,9 @@ const User = () => {
   const [user, setUser] = useState(null);
   const [followedArtists, setFollowedArtists] = useState(null);
   const [playlists, setPlaylists] = useState(null);
-  const [topArtists, setTopArtists] = useState(null);
-  const [topTracks, setTopTracks] = useState(null);
+  const { address, setAddress } = useAppContext();
+  const [nftsFetched, setNftsFetched] = useState(false);
+  const [nftArray, setNftArray] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -189,33 +191,25 @@ const User = () => {
       setUser(user);
       setFollowedArtists(followedArtists);
       setPlaylists(playlists);
-      setTopArtists(topArtists);
-      setTopTracks(topTracks);
     };
     catchErrors(fetchData());
   }, []);
 
-  const handleMint = param => e => {
-    e.preventDefault();
-    console.log('ici ca devrait minter');
-    console.log(param);
+  useEffect(() => {
+    console.log(address)
+    if (address !== null) {
+      fetchNFTs();
+    }
+  }, []);
 
-    fetch('https://api.nftport.xyz/v0/mints/easy/urls', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'c6618766-f77a-4a6d-8859-9ffd3ff363fe',
-      },
-      body:
-        '{"chain":"polygon","name":"TEST OGZ","description":"Just a test","file_url":"https://ipfs.io/ipfs/bafybeiezhxuzeyt7cjtpeu6mqam2fqz2uud3mdd7v4y4gvxfyiwhfmusza","mint_to_address":"0xFe48Eb58b0B889E57844F50B4da7B1886F680C4F"}',
-    })
-      .then(response => {
-        console.log(response);
-      })
-      .catch(err => {
-        console.error(err);
-      });
-  };
+  const fetchNFTs = async () => {
+    const options = { chain: 'matic', address: address, token_address: '0x7ba4dd0e097baed4fbf5905d566e6d5c7282681f' }
+    const nfts = await Moralis.Web3API.account.getNFTsForContract(options)
+    console.log(nfts)
+    // setNftArray(nftArrays.result)
+    // setNftsFetched(true)
+  }
+
   const totalPlaylists = playlists ? playlists.total : 0;
 
   return (
@@ -258,54 +252,6 @@ const User = () => {
             <LogoutButton onClick={logout}>Logout</LogoutButton>
           </Header>
 
-          <Preview>
-            <Tracklist>
-              <TracklistHeading>
-                <h3>Top Artists of All Time</h3>
-                <MoreButton to="/artists">See More</MoreButton>
-              </TracklistHeading>
-              <div>
-                {topArtists ? (
-                  <ul>
-                    {topArtists.items.slice(0, 10).map((artist, i) => (
-                      <Artist key={i}>
-                        <ArtistArtwork to={`/artist/${artist.id}`}>
-                          {artist.images.length && <img src={artist.images[2].url} alt="Artist" />}
-                          <Mask>
-                            <IconInfo />
-                          </Mask>
-                        </ArtistArtwork>
-                        <ArtistName to={`/artist/${artist.id}`}>
-                          <span>{artist.name}</span>
-                        </ArtistName>
-                        <button value={artist} onClick={handleMint(artist)}>
-                          Mint my proof of listening
-                        </button>
-                      </Artist>
-                    ))}
-                  </ul>
-                ) : (
-                  <Loader />
-                )}
-              </div>
-            </Tracklist>
-
-            <Tracklist>
-              <TracklistHeading>
-                <h3>Top Tracks of All Time</h3>
-                <MoreButton to="/tracks">See More</MoreButton>
-              </TracklistHeading>
-              <ul>
-                {topTracks ? (
-                  topTracks.items
-                    .slice(0, 10)
-                    .map((track, i) => <TrackItem track={track} key={i} />)
-                ) : (
-                  <Loader />
-                )}
-              </ul>
-            </Tracklist>
-          </Preview>
         </Main>
       ) : (
         <Loader />

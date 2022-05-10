@@ -8,7 +8,8 @@ import styled from 'styled-components/macro';
 import { theme, mixins, media } from '../styles';
 import { useAppContext } from '../utils/stateContext';
 
-const clientId = "BKBZTpKvhThYOmx_knjEQiDNh1FW1QKg_plaECc1npAGhP7ON9Bjf1RJ0hI9w12coYdIMDTuur_NBEeT9te6o00";
+const clientId =
+  'BKBZTpKvhThYOmx_knjEQiDNh1FW1QKg_plaECc1npAGhP7ON9Bjf1RJ0hI9w12coYdIMDTuur_NBEeT9te6o00';
 const { colors, fontSizes } = theme;
 
 const Container = styled.nav`
@@ -146,28 +147,28 @@ const isActive = ({ isCurrent }) => (isCurrent ? { className: 'active' } : null)
 const NavLink = props => <Link getProps={isActive} {...props} />;
 
 function Nav() {
-const { authenticate, isAuthenticated, isAuthenticating, user, account, logout } = useMoralis();
-const Web3Api = useMoralisWeb3Api();
-const setUserAddress = token => window.localStorage.setItem('user_eth_address', token);
-  
-const handleConnectMagic = async () => {
-  await authenticate({
-    provider: "magicLink",
-    email: "yanis.meziane@essec.edu", 
-    apiKey: "pk_live_306BF7CB3AD3B8F1",
-    network: "mainnet"
-  })
-}
+  const { authenticate, isAuthenticated, isAuthenticating, user, account, logout } = useMoralis();
+  const Web3Api = useMoralisWeb3Api();
+  const setUserAddress = token => window.localStorage.setItem('user_eth_address', token);
 
-const showUser = async () => {
-  console.log("user",user)
-  console.log("account", user.attributes.accounts)
-}
+  const handleConnectMagic = async () => {
+    await authenticate({
+      provider: 'magicLink',
+      email: 'yanis.meziane@essec.edu',
+      apiKey: 'pk_live_306BF7CB3AD3B8F1',
+      network: 'mainnet',
+    });
+  };
 
-useEffect(() => {
-  const address = user.attributes.accounts[0]
-  setUserAddress(address)
-},[])
+  const showUser = async () => {
+    console.log('user', user);
+    console.log('account', user.attributes.accounts);
+  };
+
+  useEffect(() => {
+    const address = user.attributes.accounts[0];
+    setUserAddress(address);
+  }, []);
 
   const logOut = async () => {
     await logout();
@@ -183,17 +184,17 @@ useEffect(() => {
       </Logo>
       {isAuthenticated ? (
         <>
-        <LogoutButton onClick={logOut}>Logout</LogoutButton>
-        <button onClick={showUser} className="card">
-        User
-      </button>
-      </>
+          <LogoutButton onClick={logOut}>Logout</LogoutButton>
+          <button onClick={showUser} className="card">
+            User
+          </button>
+        </>
       ) : (
         <>
-        <button onClick={handleConnectMagic} className="card">
-        Login
-      </button>
-    </>
+          <button onClick={handleConnectMagic} className="card">
+            Login
+          </button>
+        </>
       )}
       <Menu>
         <MenuItem>

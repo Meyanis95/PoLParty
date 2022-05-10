@@ -186,7 +186,7 @@ const User = () => {
   const Web3Api = useMoralisWeb3Api();
 
   const address = () => window.localStorage.getItem('user_eth_address');
-  const userAddress = address()
+  const userAddress = address();
 
   useEffect(() => {
     const fetchData = async () => {

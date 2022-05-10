@@ -157,10 +157,10 @@ const Test = () => {
   const [topArtist, setTopArtist] = useState(null);
   const [rarity, setRarity] = useState(null);
   //const { address, setAddress } = useAppContext();
-  const { isAuthenticated, user} = useMoralis();
+  const { isAuthenticated, user } = useMoralis();
   const Web3Api = useMoralisWeb3Api();
 
-  const address = user.attributes.accounts[0]
+  const address = user.attributes.accounts[0];
 
   useEffect(() => {
     setAccessToken(token);
@@ -169,7 +169,7 @@ const Test = () => {
       setTopArtist(data);
     };
     fetchData();
-    console.log('l\'adresse que je récupère dans test', address);
+    console.log("l'adresse que je récupère dans test", address);
   }, []);
 
   useEffect(() => {
@@ -227,12 +227,12 @@ const Test = () => {
             //handle error here
           });
       } catch (err) {
-        resolve(err)
+        resolve(err);
       }
-    })
+    });
   };
 
-  const mintNFT = (_ipfsUrl) => {
+  const mintNFT = _ipfsUrl => {
     notifyMinting();
     const options = {
       url: 'http://localhost:8888/mint',
@@ -245,11 +245,10 @@ const Test = () => {
     axios
       .request(options)
       .then(function (response) {
-        if (response.data.response === "OK") {
+        if (response.data.response === 'OK') {
           console.log(response.data);
           notifyMinted();
-        }
-        else {
+        } else {
           console.log(response.data);
           notifyError();
         }

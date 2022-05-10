@@ -9,8 +9,7 @@ import CardsCollection from './CardsCollection';
 
 import styled from 'styled-components/macro';
 import { theme, mixins, media, Main } from '../styles';
-import { useAppContext } from '../utils/stateContext';
-import Moralis from 'moralis';
+import { useMoralis, useMoralisWeb3Api } from 'react-moralis';
 const { colors, fontSizes, spacing } = theme;
 
 const Header = styled.header`
@@ -182,9 +181,12 @@ const User = () => {
   const [user, setUser] = useState(null);
   const [followedArtists, setFollowedArtists] = useState(null);
   const [playlists, setPlaylists] = useState(null);
-  const { address, setAddress } = useAppContext();
   const [nftsFetched, setNftsFetched] = useState(false);
   const [nftArray, setNftArray] = useState([]);
+  const Web3Api = useMoralisWeb3Api();
+
+  const address = () => window.localStorage.getItem('user_eth_address');
+  const userAddress = address()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -206,10 +208,10 @@ const User = () => {
   const fetchNFTs = async () => {
     const options = {
       chain: 'matic',
-      address: address,
+      address: userAddress,
       token_address: '0x7ba4dd0e097baed4fbf5905d566e6d5c7282681f',
     };
-    const nfts = await Moralis.Web3API.account.getNFTsForContract(options);
+    const nfts = await Web3Api.account.getNFTsForContract(options);
     console.log(nfts);
     setNftArray(nfts.result);
     // setNftArray(nftArrays.result)

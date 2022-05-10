@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from '@reach/router';
-import { useMoralis } from 'react-moralis';
+import { useMoralis, useMoralisWeb3Api } from 'react-moralis';
 
 import { IconUser, IconMicrophone, IconMusic } from './icons';
 
 import styled from 'styled-components/macro';
 import { theme, mixins, media } from '../styles';
 import { useAppContext } from '../utils/stateContext';
+
+const clientId = "BKBZTpKvhThYOmx_knjEQiDNh1FW1QKg_plaECc1npAGhP7ON9Bjf1RJ0hI9w12coYdIMDTuur_NBEeT9te6o00";
 const { colors, fontSizes } = theme;
 
 const Container = styled.nav`
@@ -144,22 +146,28 @@ const isActive = ({ isCurrent }) => (isCurrent ? { className: 'active' } : null)
 const NavLink = props => <Link getProps={isActive} {...props} />;
 
 function Nav() {
-  const { authenticate, isAuthenticated, isAuthenticating, user, account, logout } = useMoralis();
-  const { address, setAddress } = useAppContext();
+const { authenticate, isAuthenticated, isAuthenticating, user, account, logout } = useMoralis();
+const Web3Api = useMoralisWeb3Api();
+const setUserAddress = token => window.localStorage.setItem('user_eth_address', token);
+  
+const handleConnectMagic = async () => {
+  await authenticate({
+    provider: "magicLink",
+    email: "yanis.meziane@essec.edu", 
+    apiKey: "pk_live_306BF7CB3AD3B8F1",
+    network: "mainnet"
+  })
+}
 
-  const login = async () => {
-    if (!isAuthenticated) {
-      await authenticate({ signingMessage: 'Log in using Moralis' })
-        .then(function (user) {
-          console.log('logged in user:', user);
-          console.log(user.get('ethAddress'));
-          setAddress(user.get('ethAddress'));
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
-    }
-  };
+const showUser = async () => {
+  console.log("user",user)
+  console.log("account", user.attributes.accounts)
+}
+
+useEffect(() => {
+  const address = user.attributes.accounts[0]
+  setUserAddress(address)
+},[])
 
   const logOut = async () => {
     await logout();
@@ -174,9 +182,18 @@ function Nav() {
         </Link>
       </Logo>
       {isAuthenticated ? (
+        <>
         <LogoutButton onClick={logOut}>Logout</LogoutButton>
+        <button onClick={showUser} className="card">
+        User
+      </button>
+      </>
       ) : (
-        <LogoutButton onClick={login}>Connect Wallet</LogoutButton>
+        <>
+        <button onClick={handleConnectMagic} className="card">
+        Login
+      </button>
+    </>
       )}
       <Menu>
         <MenuItem>

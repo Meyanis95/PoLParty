@@ -11,6 +11,7 @@ import axios from 'axios';
 import { useAppContext } from '../utils/stateContext';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useMoralis, useMoralisWeb3Api } from 'react-moralis';
 const { colors, fontSizes, spacing } = theme;
 
 const ArtistsContainer = styled.div`
@@ -140,12 +141,26 @@ const notifyMinted = () =>
     draggable: true,
     progress: undefined,
   });
+const notifyError = () =>
+  toast.error('Oups an error occured!', {
+    position: 'top-right',
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+  });
 
 const Test = () => {
   const [accessToken, setAccessToken] = useState('');
   const [topArtist, setTopArtist] = useState(null);
   const [rarity, setRarity] = useState(null);
-  const { address, setAddress } = useAppContext();
+  //const { address, setAddress } = useAppContext();
+  const { isAuthenticated, user} = useMoralis();
+  const Web3Api = useMoralisWeb3Api();
+
+  const address = user.attributes.accounts[0]
 
   useEffect(() => {
     setAccessToken(token);
@@ -230,8 +245,14 @@ const Test = () => {
     axios
       .request(options)
       .then(function (response) {
-        console.log(response.data);
-        notifyMinted();
+        if (response.data.response === "OK") {
+          console.log(response.data);
+          notifyMinted();
+        }
+        else {
+          console.log(response.data);
+          notifyError();
+        }
       })
       .catch(function (error) {
         console.error(error);
